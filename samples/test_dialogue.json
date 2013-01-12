@@ -44,7 +44,28 @@
                     ]
                 },
                 {
-                    "text":"don't change globals",
+                    "text":"enable third response",
+                    "effects":[
+                        {
+                            "variable":"third_response",
+                            "operation":"set"
+                        }
+                    ],
+                    "transitions":[
+                        {
+                            "target":0,
+                            "conditions":[]
+                        }
+                    ]
+                },
+                {
+                    "preconditions":[
+                        {
+                            "variable":"third_response",
+                            "operation":"set"
+                        }
+                    ],
+                    "text":"sneaky third response",
                     "effects":[],
                     "transitions":[
                         {

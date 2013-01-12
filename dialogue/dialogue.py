@@ -6,6 +6,8 @@ from __future__ import print_function, unicode_literals
 from collections import defaultdict
 
 #todo: complex boolean conditionals
+#todo: more flexible prompt (multi-line, multi-char)
+#todo: fuzzy logic
 
 class Condition(object):
     def __init__(self, condition):
@@ -87,7 +89,7 @@ class Dialogue(object):
         Returns the list of available responses.
         """
         if self.done is False:
-            return self.prompts[self.current_prompt].get_responses()
+            return self.prompts[self.current_prompt].get_responses(self.globals)
         else:
             return None
 
@@ -96,7 +98,9 @@ class Dialogue(object):
         Answers the prompt with the chosen response index.  Responses are 0-indexed.
         """
         if not self.done:
-            chosen_response = self.prompts[self.current_prompt].responses[response_ix]
+            active_responses = [response for response in self.prompts[self.current_prompt].responses if
+                                all([precondition.apply(self.globals) for precondition in response.preconditions])]
+            chosen_response = active_responses[response_ix]
             chosen_response.apply_effects(self.globals)
             next = chosen_response.get_next(self.globals)
             self.current_prompt = next
@@ -123,8 +127,10 @@ class Prompt(object):
         for response in response_list:
             self.responses.append(Response(response))
 
-    def get_responses(self):
-        return [response.text for response in self.responses]
+    def get_responses(self, globals):
+        active_responses = [response.text for response in self.responses if
+                            all([precondition.apply(globals) for precondition in response.preconditions])]
+        return active_responses
 
 
 class Response(object):
@@ -132,8 +138,14 @@ class Response(object):
         self.text = response["text"]
         self.effects = []
         self.transitions = []
-        self._create_effects(response["effects"])
+        self.preconditions = []
+        self._create_preconditions(response.get("preconditions", []))
+        self._create_effects(response.get("effects", []))
         self._create_transitions(response["transitions"])
+
+    def _create_preconditions(self, preconditions_list):
+        for precondition in preconditions_list:
+            self.preconditions.append(Condition(precondition))
 
     def _create_effects(self, effect_list):
         for effect in effect_list:
