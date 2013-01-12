@@ -20,6 +20,21 @@
                             "variable":"a",
                             "operation":"=",
                             "value":6
+                        },
+                        {
+                            "variable":"ran",
+                            "operation":"=",
+                            "value":"eval:random()"
+                        },
+                        {
+                            "variable":"ranran",
+                            "operation":"=",
+                            "value":"eval:randrange(1, 5)"
+                        },
+                        {
+                            "variable":"ranran",
+                            "operation":"+",
+                            "value":"ran"
                         }
                     ],
                     "transitions":[

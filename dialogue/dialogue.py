@@ -42,6 +42,12 @@ class Effect(object):
         self.value = effect.get("value", None)
 
     def apply(self, globals):
+        if isinstance(self.value, unicode):
+            if self.value.startswith("eval:"):
+                self.value = eval(self.value[5:])
+            else:
+                self.value = globals[self.value]
+
         mutation = {"+": lambda x: x + self.value,
                     "-": lambda x: x - self.value,
                     "=": lambda x: self.value,
