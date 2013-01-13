@@ -7,7 +7,10 @@
     "prompts":[
         {
             "id":0,
-            "text":"Hello",
+            "text":[
+                ["NPC", "Even though \"lorem ipsum\" may arouse curiosity because of its resemblance to classical Latin, it is not intended to have meaning. If text is comprehensible in a document, people tend to focus on the textual content rather than upon overall presentation. Therefore publishers use lorem ipsum when displaying a typeface or design elements and page layout in order to direct the focus to the publication style and not the meaning of the text. In spite of its basis in Latin, the use of lorem ipsum is often referred to as greeking, from the phrase \"it's all Greek to me\", which indicates that something is not meant to be readable text, although greeking has other meanings as well."],
+                ["Player", "player"]
+            ],
             "responses":[
                 {
                     "text":"Set flag b, and set a to 6",
@@ -93,7 +96,9 @@
         },
         {
             "id":1,
-            "text":"End with response",
+            "text":[
+                ["NPC", "End with response"]
+            ],
             "responses":[
                 {
                     "text":"bye",
@@ -109,7 +114,9 @@
         },
         {
             "id":2,
-            "text":"End without response",
+            "text":[
+                ["NPC", "End without response"]
+            ],
             "responses":[
             ]
         }

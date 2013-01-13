@@ -1,21 +1,32 @@
+# coding=utf-8
+
 """
 Basic data structures needed to support dialogue system.
 """
 
 from __future__ import print_function, unicode_literals
 from collections import defaultdict
+#noinspection PyUnresolvedReferences
+from random import random, randrange
+
+import textwrap
 
 #todo: complex boolean conditionals
-#todo: more flexible prompt (multi-line, multi-char)
-#todo: fuzzy logic
 
 class Condition(object):
+    """
+    A simple condition which can be applied to the global state.
+    """
+
     def __init__(self, condition):
         self.variable = condition["variable"]
         self.operation = condition["operation"]
         self.value = condition.get("value", None)
 
     def apply(self, globals):
+        """
+        Checks the condition against the global state dict to evaluate.
+        """
         value = globals[self.variable]
         is_boolean_op = (self.operation == "set" or self.operation == "unset")
 
@@ -36,12 +47,19 @@ class Condition(object):
 
 
 class Effect(object):
+    """
+    An effect that can be triggered by a response.
+    """
+
     def __init__(self, effect):
         self.variable = effect["variable"]
         self.operation = effect["operation"]
         self.value = effect.get("value", None)
 
     def apply(self, globals):
+        """
+        Applies an effect to the global state dict.
+        """
         if isinstance(self.value, unicode):
             if self.value.startswith("eval:"):
                 self.value = eval(self.value[5:])
@@ -86,7 +104,7 @@ class Dialogue(object):
         if self.done is False:
             if not self.prompts[self.current_prompt].responses:
                 self.done = True
-            return self.prompts[self.current_prompt].text
+            return self.prompts[self.current_prompt].get_prompt()
         else:
             return None
 
@@ -123,8 +141,12 @@ class Dialogue(object):
 
 
 class Prompt(object):
+    """
+    A Prompt represents a node in the conversation graph.
+    """
+
     def __init__(self, prompt):
-        self.text = prompt["text"]
+        self.texts = prompt["text"]
         self.id = prompt["id"]
         self.responses = []
         self._create_responses(prompt["responses"])
@@ -133,13 +155,26 @@ class Prompt(object):
         for response in response_list:
             self.responses.append(Response(response))
 
+    def get_prompt(self):
+        """
+        Returns a list of 2-tuples (speaker, prompt)
+        """
+        return self.texts
+
     def get_responses(self, globals):
+        """
+        Returns a list of responses available given the current global state
+        """
         active_responses = [response.text for response in self.responses if
                             all([precondition.apply(globals) for precondition in response.preconditions])]
         return active_responses
 
 
 class Response(object):
+    """
+    Responses to prompts.
+    """
+
     def __init__(self, response):
         self.text = response["text"]
         self.effects = []
@@ -166,6 +201,9 @@ class Response(object):
             self.transitions.append((target, conditions))
 
     def get_next(self, globals):
+        """
+        Gets the next prompt id given the current global state.
+        """
         ret = -1
         for target, conditions in self.transitions:
             if all([cond.apply(globals) for cond in conditions]):
@@ -174,18 +212,42 @@ class Response(object):
         return ret
 
     def apply_effects(self, globals):
+        """
+        Applies the effects associated with choosing this response
+        """
         for effect in self.effects:
             effect.apply(globals)
 
 
 class ConsoleEngine(object):
+    """
+    A simple console engine to demonstrate running a conversation.
+    """
+
     def __init__(self, dialog):
         self.dialog = dialog
 
+    def print_prompts(self, prompts):
+        """
+        Pretty prints prompts
+        """
+        longest_name = max([len(speaker) for speaker, prompt in prompts]) + 4
+        column_two = 80 - longest_name
+        for speaker, prompt in prompts:
+            prompt_lines = textwrap.wrap(prompt, column_two)
+            print("{0:<{width}} {1:<{width_two}}".format(speaker + ":", prompt_lines[0], width=longest_name,
+                width_two=column_two))
+            for prompt_line in prompt_lines[1:]:
+                print("{0:<{width}} {1:<{width_two}}".format("", prompt_line, width=longest_name, width_two=column_two))
+            print()
+
     def run(self):
+        """
+        Runs the conversation.
+        """
         while True:
-            print("(globals: ", self.dialog.get_globals(), ")")
-            print(self.dialog.get_prompt())
+            prompts = self.dialog.get_prompt()
+            self.print_prompts(prompts)
             if self.dialog.is_done():
                 break
 
