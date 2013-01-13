@@ -1,11 +1,24 @@
-from dialogue import dialogue
+# coding=utf-8
+
+"""
+Simple test.
+"""
+
 import json
 import os.path
 
-js = json.load(open(os.path.join("samples/test_dialogue.json"), "r"))
+from dialogue import dialogue
 
-d = dialogue.Dialogue(js)
 
-ce = dialogue.ConsoleEngine(d)
+def main():
+    """
+    Simple dialogue test
+    """
+    js = json.load(open(os.path.join("samples/test_dialogue.json"), "r"))
+    d = dialogue.Dialogue(js)
+    ce = dialogue.ConsoleEngine(d)
+    ce.run()
 
-ce.run()
+
+if __name__ == "__main__":
+    main()
