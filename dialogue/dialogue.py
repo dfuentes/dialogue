@@ -8,10 +8,10 @@ from __future__ import print_function, unicode_literals
 from collections import defaultdict
 #noinspection PyUnresolvedReferences
 from random import random, randrange
-
 import textwrap
 
 #todo: complex boolean conditionals
+
 
 class Condition(object):
     """
@@ -26,6 +26,7 @@ class Condition(object):
     def apply(self, globals):
         """
         Checks the condition against the global state dict to evaluate.
+        :param globals:
         """
         value = globals[self.variable]
         is_boolean_op = (self.operation == "set" or self.operation == "unset")
@@ -43,7 +44,8 @@ class Condition(object):
         return ret
 
     def __repr__(self):
-        return "<variable: %s, operation: %s, value: %s>" % (self.variable, self.operation, self.value)
+        return "<variable: %s, operation: %s, value: %s>" % (
+            self.variable, self.operation, self.value)
 
 
 class Effect(object):
@@ -59,6 +61,7 @@ class Effect(object):
     def apply(self, globals):
         """
         Applies an effect to the global state dict.
+        :param globals:
         """
         if isinstance(self.value, unicode):
             if self.value.startswith("eval:"):
@@ -119,11 +122,15 @@ class Dialogue(object):
 
     def answer(self, response_ix):
         """
-        Answers the prompt with the chosen response index.  Responses are 0-indexed.
+        Answers the prompt with the chosen response index.  Responses are
+        0-indexed.
+        :param response_ix:
         """
         if not self.done:
-            active_responses = [response for response in self.prompts[self.current_prompt].responses if
-                                all([precondition.apply(self.globals) for precondition in response.preconditions])]
+            active_responses = [response for response in
+                                self.prompts[self.current_prompt].responses if
+                                all([precondition.apply(self.globals) for
+                                     precondition in response.preconditions])]
             chosen_response = active_responses[response_ix]
             chosen_response.apply_effects(self.globals)
             next = chosen_response.get_next(self.globals)
@@ -164,9 +171,11 @@ class Prompt(object):
     def get_responses(self, globals):
         """
         Returns a list of responses available given the current global state
+        :param globals:
         """
         active_responses = [response.text for response in self.responses if
-                            all([precondition.apply(globals) for precondition in response.preconditions])]
+                            all([precondition.apply(globals) for precondition in
+                                 response.preconditions])]
         return active_responses
 
 
@@ -203,6 +212,7 @@ class Response(object):
     def get_next(self, globals):
         """
         Gets the next prompt id given the current global state.
+        :param globals:
         """
         ret = -1
         for target, conditions in self.transitions:
@@ -214,6 +224,7 @@ class Response(object):
     def apply_effects(self, globals):
         """
         Applies the effects associated with choosing this response
+        :param globals:
         """
         for effect in self.effects:
             effect.apply(globals)
@@ -230,15 +241,20 @@ class ConsoleEngine(object):
     def print_prompts(self, prompts):
         """
         Pretty prints prompts
+        :param prompts:
         """
         longest_name = max([len(speaker) for speaker, prompt in prompts]) + 4
         column_two = 80 - longest_name
         for speaker, prompt in prompts:
             prompt_lines = textwrap.wrap(prompt, column_two)
-            print("{0:<{width}} {1:<{width_two}}".format(speaker + ":", prompt_lines[0], width=longest_name,
-                width_two=column_two))
+            print("{0:<{width}} {1:<{width_two}}".format(speaker + ":",
+                                                         prompt_lines[0],
+                                                         width=longest_name,
+                                                         width_two=column_two))
             for prompt_line in prompt_lines[1:]:
-                print("{0:<{width}} {1:<{width_two}}".format("", prompt_line, width=longest_name, width_two=column_two))
+                print("{0:<{width}} {1:<{width_2}}".format("", prompt_line,
+                                                           width=longest_name,
+                                                           width_2=column_two))
             print()
 
     def run(self):
@@ -262,7 +278,8 @@ class ConsoleEngine(object):
                 try:
                     res = int(res)
                 except ValueError:
-                    print("Response must be an int between %d and %d" % (1, ix - 1))
+                    print("Response must be an int between %d and %d" % (
+                        1, ix - 1))
                     continue
 
                 if res < 1 or res > ix - 1:
