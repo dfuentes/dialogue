@@ -116,7 +116,8 @@ class Dialogue(object):
         Returns the list of available responses.
         """
         if self.done is False:
-            return self.prompts[self.current_prompt].get_responses(self.globals)
+            return self.prompts[self.current_prompt].get_responses(
+                self.globals)
         else:
             return None
 
@@ -174,7 +175,8 @@ class Prompt(object):
         :param globals:
         """
         active_responses = [response.text for response in self.responses if
-                            all([precondition.apply(globals) for precondition in
+                            all([precondition.apply(globals) for precondition
+                                 in
                                  response.preconditions])]
         return active_responses
 
@@ -247,14 +249,14 @@ class ConsoleEngine(object):
         column_two = 80 - longest_name
         for speaker, prompt in prompts:
             prompt_lines = textwrap.wrap(prompt, column_two)
-            print("{0:<{width}} {1:<{width_two}}".format(speaker + ":",
-                                                         prompt_lines[0],
-                                                         width=longest_name,
-                                                         width_two=column_two))
+            print("{0:{width}}{1:{width_2}}".format(speaker + ":",
+                                                    prompt_lines[0],
+                                                    width=longest_name,
+                                                    width_2=column_two))
             for prompt_line in prompt_lines[1:]:
-                print("{0:<{width}} {1:<{width_2}}".format("", prompt_line,
-                                                           width=longest_name,
-                                                           width_2=column_two))
+                print("{0:{width}}{1:{width_2}}".format("", prompt_line,
+                                                        width=longest_name,
+                                                        width_2=column_two))
             print()
 
     def run(self):
